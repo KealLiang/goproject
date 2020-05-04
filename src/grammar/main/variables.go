@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"strconv"
 	"unsafe"
 	"util/logs"
@@ -9,10 +10,17 @@ import (
 
 /*
 	##go中的变量
+	* 变量的分类
+		- 值类型 直接指向数据空间
+		- 引用类型 指向数据空间的地址
 
 	* go中的变量，通过首字母大小写表示共有或私有
 		- 首字母大写 public
 		- 首字母小写 private
+
+	* go中的map
+		- keyType 不能是slice\map\function 因为不能用 == 来比较
+		- valueType 和keyType一样
 
 	* 额外知识点 UTF-8 是 Unicode 编码的一种具体实现
 
@@ -20,6 +28,79 @@ import (
 		- 语法 type myInt int // go中认为myInt和int是两个类型（即使他们都是int）
 
 */
+
+func mapDemo() {
+	logs.Begin("go 中的map演示")
+	var m1 map[string]int //声明是不会分配内存的，初始化需要make，分配内存后才能赋值和使用
+	m1 = make(map[string]int, 3)
+	m1["思考"] = 1 //没分配空间会报错
+	m1["行动"] = 2
+	m1["反思"] = 3
+	fmt.Println("新建了一个map，map是无序的：", m1)
+}
+
+func sliceDemo2() {
+	logs.Begin("go 中的切片操作2")
+	var s1 []int = []int{100, 200, 300}
+	s2 := append(s1, 400, 500)
+	fmt.Println("切片s1是：", s1)
+	fmt.Println("切片s2是：", s2)
+	fmt.Printf("append本质是底层new了一个新的数组并copy元素，地址和原来不同：\n&s1 = %p; &s2 = %p\n", &s1, &s2)
+
+	logs.Separate("string进行切片处理")
+	str := "lsrmod2014@163.com"
+	fmt.Println("对字符串切片得到邮箱地址：", str[10:])
+	runes := []rune(str) // []byte中文会有问题，[]rune都可以
+	runes[0] = 'L'
+	str = string(runes)
+	fmt.Println("string是不可变的，想改需要先变为切片，再转回byte数组：", str)
+}
+
+func sliceDemo() {
+	logs.Begin("go 中的切片（引用类型）")
+	var hens [10]int // 8字节
+	for i := 0; i < 10; i++ {
+		hens[i] = rand.Intn(20)
+	}
+	fmt.Println("hens数组为：", hens)
+	// 切片存的有三个部分： 起始地址, 长度, 容量
+	logs.Separate("方式一：通过数组切出切片")
+	slice := hens[1:5]
+	fmt.Println("hens[1:5]切片为：", slice)
+	fmt.Printf("这两个地址相等 &hens[1] = %p; &slice[0] = %p;\n", &hens[1], &slice[0])
+	fmt.Println("此例中slice存的是： &hens[1], 4, 9")
+	fmt.Println("slice切片长度为：", len(slice))
+	fmt.Println("slice切片容量为：", cap(slice)) //切片的容量是动态变化的
+
+	logs.Separate("方式二：使用make创建切片")
+	var s1 []float64 = make([]float64, 5, 10) //底层还是数组，但这个数组是不可见的，只能通过切片访问
+	fmt.Println("使用make([]float64, 5, 10)初始化的切片：", s1)
+
+	logs.Separate("方式三：定义一个切片，直接就指定具体的数组")
+	var s2 []string = []string{"tom", "jerry", "mike"}
+	fmt.Println("s2 的元素为：", s2)
+	fmt.Println("s2 的长度为：", len(s2))
+	fmt.Println("s2 的容量为：", cap(s2))
+}
+
+func arrayDemo() {
+	logs.Begin("go 中的数组（值类型）")
+	var a1 []int //这里的a1，定义时没有写大小，其实是切片(slice)
+	a2 := [...]int{1, 2}
+	fmt.Printf("a1的类型是%T（没大小的是切片）\na2的类型是%T（go中长度是数组类型的一部分）\n", a1, a2)
+	var array = [...]string{1: "张三", 0: "李四", 9: "王五"} //指定下标
+	fmt.Println("array 的 length和值 分别是：", len(array), array)
+
+	var hens [10]int // 8字节
+	for i := 0; i < 10; i++ {
+		hens[i] = rand.Intn(20)
+	}
+	fmt.Println("生成的数组为：", hens)
+	fmt.Printf("hens的地址是：%p\n", &hens)
+	fmt.Println("hens[0]的地址是：", &hens[0])
+	fmt.Println("hens[1]的地址是，hens[1]-hens[0]是 8字节(64位)：", &hens[1])
+	fmt.Println("hens[2]的地址是，hens[2]-hens[1]是 8字节(64位)：", &hens[2])
+}
 
 func defindSelfType() {
 	logs.Begin("go 中自定义数量类型")
@@ -191,4 +272,8 @@ func main() {
 	globalValue()
 	changeType()
 	defindSelfType()
+	arrayDemo()
+	sliceDemo()
+	sliceDemo2()
+	mapDemo()
 }

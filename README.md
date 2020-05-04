@@ -13,10 +13,17 @@
 | run方式 | 脚本形式 | 每次都要隐式编译 | 一样 |
 
 ##go中的变量
+* 变量的分类
+    - 值类型 直接指向数据空间
+    - 引用类型 指向数据空间的地址
 
 * go中的变量，通过首字母大小写表示共有或私有
     - 首字母大写 public
     - 首字母小写 private
+
+* go中的map
+    - keyType 不能是slice\map\function 因为不能用 == 来比较
+    - valueType 和keyType一样
 
 * 额外知识点 UTF-8 是 Unicode 编码的一种具体实现
 
