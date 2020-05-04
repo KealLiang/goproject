@@ -1,7 +1,7 @@
 package main
 
 /*
-	##go中引包示例
+	##go中包管理
 	* 注意：需要将 D:\coding\Go\fundamental 加入Project GOPATH GoLand才有提示
 		- 将当前目录加入GOPATH后，跳过src写文件夹名（斜杠分隔）即可import
 		- eg.
@@ -11,6 +11,7 @@ package main
 
 	* import时，路径从 $GOPATH 的src下开始，不用带src（命令行可以 echo %GOPATH% 查看）
 	* import的是文件夹，使用也是[包名.变量名]，不是文件名！
+	* 如果要编译为一个可执行文件，就需要将包声明为main
 */
 
 import (

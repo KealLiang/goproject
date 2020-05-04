@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"unsafe"
+	"util/logs"
 )
 
 /*
@@ -14,7 +15,20 @@ import (
 		- 首字母小写 private
 
 	* 额外知识点 UTF-8 是 Unicode 编码的一种具体实现
+
+	* go支持自定义数据类型（c语言的那套）
+		- 语法 type myInt int // go中认为myInt和int是两个类型（即使他们都是int）
+
 */
+
+func defindSelfType() {
+	logs.Begin("go 中自定义数量类型")
+	type myInt int
+	var i myInt = 10
+	fmt.Println("自定义的 i 值为：", i)
+	var i2 int = int(i)
+	fmt.Println("即使myInt本身就是int，go也认为他们不同，必须显示转换 i2 值为：", i2)
+}
 
 func varType() {
 	fmt.Println("=== GO中的变量类型 BEGIN ===")
@@ -176,4 +190,5 @@ func main() {
 	multiValue()
 	globalValue()
 	changeType()
+	defindSelfType()
 }
