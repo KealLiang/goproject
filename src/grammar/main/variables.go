@@ -31,12 +31,60 @@ import (
 
 func mapDemo() {
 	logs.Begin("go 中的map演示")
+	logs.Separate("第一种建立map的方式")
 	var m1 map[string]int //声明是不会分配内存的，初始化需要make，分配内存后才能赋值和使用
-	m1 = make(map[string]int, 3)
+	m1 = make(map[string]int, 2)
 	m1["思考"] = 1 //没分配空间会报错
 	m1["行动"] = 2
 	m1["反思"] = 3
+	m1["创造"] = 4
 	fmt.Println("新建了一个map，map是无序的：", m1)
+
+	logs.Separate("第二种建立map的方式")
+	var m2 = make(map[string]map[string]int) //省略大小默认就1个
+	m2["广西"] = make(map[string]int)          //内层还是必须先make才能赋值
+	m2["广西"]["南宁"] = 10
+	fmt.Println("又新建了一个map：", m2)
+
+	logs.Separate("第三种建立map的方式")
+	m3 := map[string]string{
+		"广东": "广州",
+		"江苏": "南京",
+	}
+	m3["四川"] = "成都"
+	fmt.Println("再新建了一个map：", m3)
+
+	logs.Separate("map元素查找与删除")
+	v, ok := m3["广东"]
+	if ok {
+		fmt.Println("是否找到：", ok, v)
+	}
+	delete(m3, "haha") //删除元素
+
+	logs.Separate("map的遍历（只能 for-range）")
+	for key, value := range m3 {
+		fmt.Println(key, value)
+	}
+}
+
+func mapSlice() {
+	logs.Begin("go 中的map切片操作")
+	// 声明一个map切片
+	monsters := make([]map[string]string, 2)
+	if monsters[0] == nil {
+		monsters[0] = make(map[string]string)
+		monsters[0]["name"] = "牛魔王"
+		monsters[0]["age"] = "500"
+	}
+	if monsters[1] == nil {
+		monsters[1] = make(map[string]string)
+		monsters[1]["name"] = "紫霞仙子"
+		monsters[1]["age"] = "1500"
+	}
+
+	// 通过append追加，避免越界
+	monsters = append(monsters, map[string]string{"name": "火云邪神", "age": "100"})
+	fmt.Println("怪物列表：", monsters)
 }
 
 func sliceDemo2() {
@@ -261,19 +309,20 @@ func changeType() {
 }
 
 func main() {
-	varType()
-	showVarType()
-	printCharAndString()
-	typeMigration()
-	inferType()
-	defaultValueDemo()
-	ellipsisVar()
-	multiValue()
-	globalValue()
-	changeType()
-	defindSelfType()
-	arrayDemo()
-	sliceDemo()
-	sliceDemo2()
+	//varType()
+	//showVarType()
+	//printCharAndString()
+	//typeMigration()
+	//inferType()
+	//defaultValueDemo()
+	//ellipsisVar()
+	//multiValue()
+	//globalValue()
+	//changeType()
+	//defindSelfType()
+	//arrayDemo()
+	//sliceDemo()
+	//sliceDemo2()
 	mapDemo()
+	mapSlice()
 }
