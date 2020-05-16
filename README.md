@@ -131,3 +131,27 @@ go的协程是*逻辑态*的，可以轻松开启上万个；其他语言的线�
 
 ###协程的ID
 * 在go语言中，谷歌开发者不建议大家获取协程ID，主要是为了GC更好的工作，滥用协程ID会导致GC不能及时回收内存
+
+
+##go中的反射
+* 反射的本质是运行时操作程序
+* 学反射就是学Type和Value，这两者可以相互获取
+    - Type	是个接口（reflect.TypeOf()）
+    - Value	是个结构体（reflect.ValueOf()）
+
+###Type和Kind区分
+* Type 类型
+* Kind 类别
+* Type和Kind可能相同也可能不同
+    - 例1：var num int = 10 那么num的Type是 int，Kind也是 int
+    - 例2：var stu Student 那么stu的Type是 包名.Student，Kind是struct
+
+###反射涉及的类型转换（见convertValueDemo()方法）
+* 过程中主要有三种类型要区分
+    - 变量
+    - interface{}
+    - reflect.Value()
+
+###通过反射修改变量
+* 当使用SetXXX方法，需要通过对应的指针类型才能改变传入的值
+* 同时配合reflect.Value().Elem()方法（类比 *ptr = newVal）
