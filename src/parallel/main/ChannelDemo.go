@@ -6,28 +6,119 @@ package main
 	* 协程间通讯可以通过管道
 	* 管道是 FIFO
 
-	##管道的死锁
+	###管道的死锁
 	* 提示：fatal error: all goroutines are asleep - deadlock!
 	* 编译器底层会分析：当管道内的数据__不流动__时，才会报死锁（这点非常重要，仔细品go语言的管道的设计理念）
 		- 生产慢消费快 不会死锁
 		- 生产快消费慢 不会死锁
 		- 修改例子writeAndReadDemo()中的rate就能看到效果
 
-	##多线程工具类比
+	###多线程工具类比
 	* CountDownLatch -> WaitGroup
+
+	###协程的ID
+	* 在go语言中，谷歌开发者不建议大家获取协程ID，主要是为了GC更好的工作，滥用协程ID会导致GC不能及时回收内存
+
 */
 
 import (
+	"bytes"
 	"fmt"
+	"runtime"
 	"time"
 	"util/logs"
 )
+
+func channelSelectDemo() {
+	logs.Begin("使用select解决从管道读数据阻塞问题")
+	intChan := make(chan int, 5)
+	stringChan := make(chan string, 5)
+	for i := 0; i < 5; i++ {
+		intChan <- i
+	}
+	for i := 0; i < 5; i++ {
+		stringChan <- fmt.Sprintf("string数据 %v", i)
+	}
+
+label:
+	for {
+		// 管道不close，一直读会导致死锁，但是实际开发中close的时机不是那么容易确认的，这时就要用另一种方式
+		//fmt.Println(<-intChan, <-stringChan)
+		time.Sleep(200 * time.Millisecond)
+		select {
+		case v := <-intChan:
+			fmt.Println("从intChan取到数据：", v)
+		case v := <-stringChan:
+			fmt.Println("从stringChan取到数据：", v)
+		default:
+			fmt.Println("取不到数据了，但是我也不会报错\"all goroutines are asleep - deadlock!\"哦 (*^_^*)")
+			break label
+		}
+	}
+	logs.End("使用select解决从管道读数据阻塞问题")
+}
+
+func channelReadWriteDemo() {
+	logs.Begin("只读只写管道示例")
+	ch := make(chan int, 10)
+	exitChan := make(chan struct{}, 3)
+	go send(ch, exitChan) // 一个生产者，两个消费者
+	go recv(ch, exitChan)
+	go recv(ch, exitChan)
+
+	total := 0
+	for _ = range exitChan {
+		total++
+		if total == 3 {
+			break
+		}
+	}
+	logs.End("只读只写管道示例")
+}
+
+func recv(ch <-chan int, exitChan chan struct{}) {
+	// ch只读
+	for {
+		v, ok := <-ch
+		if !ok {
+			break
+		}
+		fmt.Printf("接收者[%v]接收到了：%v\n", goID(), v)
+		//time.Sleep(time.Nanosecond)
+	}
+	exitChan <- struct{}{}
+}
+
+func send(ch chan<- int, exitChan chan struct{}) {
+	// ch只写
+	for i := 0; i < 6; i++ {
+		fmt.Println("写入：", i)
+		ch <- i
+		time.Sleep(time.Nanosecond)
+	}
+	close(ch)
+	exitChan <- struct{}{} //放入一个空结构体表示已处理完成
+}
+
+// 获取协程id（不建议）
+func goID() string {
+	b := make([]byte, 64)
+	b = b[:runtime.Stack(b, false)] // 这里的b拿到是：goroutine 7 [running]: main.goID(...) D:/coding/Go/fundamental/
+
+	b = b[:bytes.IndexByte(b, '[')-1]
+	return string(b)
+
+	//b = bytes.TrimPrefix(b, []byte("goroutine "))
+	//b = b[:bytes.IndexByte(b, ' ')]
+	//n, _ := strconv.ParseUint(string(b), 10, 64)
+	//return n
+}
 
 func findPrimeNumberDemo() {
 	logs.Begin("找素数的案例")
 	upper := 100000
 	start := time.Now()
-	//primeNumbers := findPrimeNumber(upper)
+	//primeNumbers := findPrimeNumber(upper) //单线程的方式
 	primeNumbers := findPrimeNumberParallel(upper, 4) //4个协程大概就是单线程的4倍
 	fmt.Println("计算耗时：", time.Since(start))
 	fmt.Printf("2~%v 中有 %v 个素数\n", upper, len(primeNumbers))
@@ -192,5 +283,7 @@ func readData(intChan chan int, exitChan chan bool, rate int) {
 
 func main() {
 	//writeAndReadDemo()
-	findPrimeNumberDemo()
+	//findPrimeNumberDemo()
+	//channelReadWriteDemo()
+	channelSelectDemo()
 }
