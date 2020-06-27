@@ -39,7 +39,7 @@ func buildinNewDemo() {
 var Age1 int = 10 // 定义同时初始化，是1句，是OK的
 //Age2 := 11 // 这里是错误的，因为这里等价于2句，而第2句赋值不能放在函数体外
 
-var f1 = globalHaha()
+var f = globalHaha()
 
 func globalHaha() string {
 	logs.Begin("这里是 globalHaha 函数")

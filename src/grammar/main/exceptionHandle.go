@@ -8,7 +8,14 @@ import (
 )
 
 /*
-	go中的错误处理
+	## go中的恐慌(panic)处理
+	* 处理恐慌的一般方式 defer-recover 模板
+	* defer关键字
+		- 底层是runtime.deferproc，在函数返回前调用
+		- return语句并非原子性的，可改写为如下三句（理解defer的关键）：
+			1. 设置 返回值 = xxx
+			1. 调用defer函数
+			1. return
 */
 
 func readConfigDemo() {
@@ -50,7 +57,38 @@ func someMethod() {
 	fmt.Println(res)
 }
 
+// ==================== 深入理解defer原理避免踩坑 ====================
+//先来看看几个例子
+//例1：
+func f1() (result int) {
+	defer func() {
+		result++
+	}()
+	return 0
+}
+
+//例2：
+func f2() (r int) {
+	t := 5
+	defer func() {
+		t = t + 5
+	}()
+	return t
+}
+
+//例3：
+func f3() (r int) {
+	defer func(r int) {
+		r = r + 5
+	}(r)
+	return 1
+}
+
 func main() {
 	panicDemo()
 	readConfigDemo()
+
+	println(f1()) // 1
+	println(f2()) // 5
+	println(f3()) // 1
 }

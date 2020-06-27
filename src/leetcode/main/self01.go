@@ -52,12 +52,12 @@ func run(n uint64) {
 	for i := 0; i < num; i++ {
 		//factorialRecursion(n)
 		//factorialDynamic(n)
-		//println(fibonacciRecursion(n))
-		println(fibonacciDynamic(n))
+		println(fibonacciRecursion(n))
+		//println(fibonacciDynamic(n))
 	}
 	fmt.Println("计算耗时（毫秒）：", (time.Now().UnixNano()-now.UnixNano())/1000/1000)
 }
 
 func main() {
-	run(50)
+	run(48)
 }

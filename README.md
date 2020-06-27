@@ -57,6 +57,15 @@
 
 * go中函数也是一个变量（函数式编程）
 
+## go中的恐慌(panic)处理
+* 处理恐慌的一般方式 defer-recover 模板
+* defer关键字
+    - 底层是runtime.deferproc，在函数返回前调用
+    - return语句并非原子性的，可改写为如下三句（理解defer的关键）：
+        1. 设置 返回值 = xxx
+        1. 调用defer函数
+        1. return
+
 ##go内存模型
 * 逻辑上：栈、堆、代码区
 
